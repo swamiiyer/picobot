@@ -111,9 +111,9 @@ def main(args):
     else:
         brow, bcol = map(int, args.bot_home.split(","))
         if brow < 1 or brow > nrows - 2 or bcol < 1 or bcol > ncols - 2:
-            sys.exit("Error: bot_home = (%s) is invalid" %(args.bot_home))
+            sys.exit("Error: bot_home = (%s) is invalid!" %(args.bot_home))
         if env[brow, bcol] == WALL:
-            sys.exit("Error: bot_home = (%s) is a wall" %(args.bot_home))
+            sys.exit("Error: bot_home = (%s) is a wall!" %(args.bot_home))
     env[brow, bcol] = VISITED
 
     # Check for repeat rules.
@@ -123,11 +123,13 @@ def main(args):
             for j in range(i + 1, len(rules[state])):
                 b = rules[state][j]
                 if not a[1].intersection(b[1]) == set():
-                    sys.exit("Error: repeat rules %s and %s in state %d" \
+                    sys.exit("Error: repeat rules %s and %s in state %d!" \
                              %(a[0], b[0], state))
 
     # Bot dynamics.
-    state = 0
+    prev_rule, rule = None, None
+    prev_state, state = 0, 0
+    prev_brow, prev_bcol = brow, bcol
     steps = 0
     visited = sum([1 for j in range(ncols) 
                    for i in range(nrows) if env[i, j] == EMPTY])
@@ -141,28 +143,31 @@ def main(args):
         steps += 1
         nhood = neighborhood(env, brow, bcol)
         mrule = matching_rule(rules, state, nhood)
+        prev_brow, prev_bcol = brow, bcol
         if mrule == None:
-            sys.exit("Error: no rule for state %d and neighborhood %s" \
+            sys.exit("Error: no rule for state %d and neighborhood %s!" \
                      %(state, nhood))
+        prev_rule = rule
+        prev_state = state
         rule, action, state = mrule[0], mrule[2], mrule[3]
         if action == 'N':
             if env[brow - 1, bcol] == WALL:
-                print("Error: cannot move to the north")
+                print("Error: cannot move to the north!")
                 break
             brow -= 1
         elif action == 'E':
             if env[brow, bcol + 1] == WALL:
-                print("Error: cannot move to the east")
+                print("Error: cannot move to the east!")
                 break
             bcol += 1
         elif action == 'W':
             if env[brow, bcol - 1] == WALL:
-                print("Error: cannot move to the west")
+                print("Error: cannot move to the west!")
                 break
             bcol -= 1
         elif action == 'S':
             if env[brow + 1, bcol] == WALL:
-                print("Error: cannot move to the south")
+                print("Error: cannot move to the south!")
                 break
             brow += 1
         else:
@@ -184,10 +189,14 @@ def main(args):
         else:
             print(msg)
         if visited == 0:
-            print("Complete!")
+            print("Coverage reached!")
+            break
+        if prev_state == state and prev_rule == rule and \
+           prev_brow == brow and prev_bcol == bcol:
+            print("Bot stopped!")
             break
         if not args.max_steps == None and steps >= args.max_steps:
-            print("Max steps reached!")
+            print("Max. steps reached!")
             break
 
     if args.g:
