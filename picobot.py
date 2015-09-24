@@ -97,7 +97,7 @@ def main(args):
         line = line.strip()
         if line == "" or line.startswith("#"):
             continue
-        a, b, c, d, e = line.split()
+        a, b, c, d, e = line.split()[:5]
         rule = b.upper()
         rules.setdefault(int(a), [])
         rules[int(a)].append((rule, expand_rule(rule), d.upper(), int(e)))
