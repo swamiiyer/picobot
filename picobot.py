@@ -1,5 +1,5 @@
 import argparse, csv, matplotlib.colors as colors, matplotlib.pyplot as plt, \
-    numpy, random, sys, time
+    numpy, random, sys, warnings
 
 # Each cell in the environment can be one of the following.
 EMPTY   = 0
@@ -137,8 +137,6 @@ def main(args):
         cmap = colors.ListedColormap(['white', 'blue', 'grey', 'green'])
         fig = plt.figure(1, figsize = (9, 9))
         fig.canvas.set_window_title("PicoBot")
-        plt.ion()
-        plt.draw()
     while True:
         steps += 1
         nhood = neighborhood(env, brow, bcol)
@@ -177,15 +175,14 @@ def main(args):
             visited -= 1
         msg = "bot at: (%d, %d), cells left: %d" %(brow, bcol, visited)
         if args.g:
-            plt.subplot(111).clear()
             envp = env.copy()
             envp[brow, bcol] = BOT
+            plt.subplot(111).clear()
             plt.title(msg)
             plt.imshow(envp[1:nrows - 1, 1:ncols - 1], cmap = cmap, 
                        interpolation = "nearest")
             plt.axis("off")
-            plt.draw()
-            time.sleep(0.01)
+            plt.pause(0.01)
         else:
             print(msg)
         if visited == 0:
@@ -202,6 +199,7 @@ def main(args):
     if args.g:
         plt.show(block = True)
         plt.close(1)
-
+        
 if __name__ == "__main__":
+    warnings.filterwarnings("ignore")
     main(sys.argv[1:])
